@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="Dashboard de monitoramento da Crescer Automação" />
+  <title>Crescer Automação | Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">C</div>
+        <div>
+          <p class="eyebrow">CRESCER AUTOMAÇÃO</p>
+          <h1>Monitoramento de consumo</h1>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <span id="connectionBadge" class="status-badge status-loading">
+          <span class="status-dot"></span>
+          Conectando
+        </span>
+        <button id="refreshButton" class="button button-primary" type="button">Atualizar</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="errorBanner" class="error-banner" hidden>
+        <strong>Não foi possível ler a planilha.</strong>
+        <span id="errorMessage"></span>
+      </section>
+
+      <section class="hero-grid" aria-label="Leitura atual">
+        <article class="hero-card hero-card-main">
+          <div>
+            <p class="card-label">Leitura atual</p>
+            <div class="hero-value-row">
+              <strong id="currentLiters" class="hero-value">--</strong>
+              <span class="hero-unit">L</span>
+            </div>
+            <p id="currentCost" class="hero-secondary">R$ --</p>
+          </div>
+          <div class="hero-meta">
+            <span>Último registro</span>
+            <strong id="lastReadingAt">--</strong>
+          </div>
+        </article>
+
+        <article class="metric-card">
+          <p class="card-label">Pulsos atuais</p>
+          <strong id="currentPulses" class="metric-value">--</strong>
+          <span class="metric-caption">contador da sessão</span>
+        </article>
+
+        <article class="metric-card">
+          <p class="card-label">Litros por pulso</p>
+          <strong id="litersPerPulse" class="metric-value">10</strong>
+          <span class="metric-caption">configuração atual</span>
+        </article>
+
+        <article class="metric-card">
+          <p class="card-label">Valor por pulso</p>
+          <strong id="valuePerPulse" class="metric-value">R$ 5,30</strong>
+          <span class="metric-caption">estimativa da leitura atual</span>
+        </article>
+      </section>
+
+      <section class="panel filters-panel">
+        <div class="panel-heading filters-heading">
+          <div>
+            <p class="card-label">Período de análise</p>
+            <h2>Filtros</h2>
+          </div>
+          <div class="preset-group" aria-label="Filtros rápidos">
+            <button class="preset-button is-active" data-preset="all" type="button">Tudo</button>
+            <button class="preset-button" data-preset="today" type="button">Hoje</button>
+            <button class="preset-button" data-preset="7d" type="button">7 dias</button>
+            <button class="preset-button" data-preset="30d" type="button">30 dias</button>
+          </div>
+        </div>
+
+        <div class="date-filter-row">
+          <label>
+            <span>Data inicial</span>
+            <input id="dateFrom" type="date" />
+          </label>
+          <label>
+            <span>Data final</span>
+            <input id="dateTo" type="date" />
+          </label>
+          <button id="applyFilterButton" class="button button-secondary" type="button">Aplicar período</button>
+        </div>
+      </section>
+
+      <section class="period-grid" aria-label="Resumo do período">
+        <article class="metric-card accent-card">
+          <p class="card-label">Consumo no período</p>
+          <strong id="periodLiters" class="metric-value">--</strong>
+          <span class="metric-caption">litros consumidos</span>
+        </article>
+        <article class="metric-card accent-card">
+          <p class="card-label">Custo no período</p>
+          <strong id="periodCost" class="metric-value">--</strong>
+          <span class="metric-caption">estimativa acumulada</span>
+        </article>
+        <article class="metric-card accent-card">
+          <p class="card-label">Pulsos no período</p>
+          <strong id="periodPulses" class="metric-value">--</strong>
+          <span class="metric-caption">pulsos contabilizados</span>
+        </article>
+        <article class="metric-card accent-card">
+          <p class="card-label">Registros válidos</p>
+          <strong id="periodRecords" class="metric-value">--</strong>
+          <span class="metric-caption">no intervalo selecionado</span>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="card-label">Evolução</p>
+              <h2>Consumo acumulado no período</h2>
+            </div>
+            <strong id="chartTotal" class="chart-total">-- L</strong>
+          </div>
+          <div id="chartEmpty" class="empty-state" hidden>Nenhum dado válido no período selecionado.</div>
+          <div id="chartWrap" class="chart-wrap" role="img" aria-label="Gráfico de consumo acumulado">
+            <svg id="consumptionChart" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="chart-axis-labels">
+            <span id="chartStart">--</span>
+            <span id="chartEnd">--</span>
+          </div>
+        </article>
+
+        <article class="panel summary-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="card-label">Origem</p>
+              <h2>Google Sheets</h2>
+            </div>
+          </div>
+          <dl class="summary-list">
+            <div><dt>Planilha</dt><dd>Projeto Dudu - CrescerAutomação</dd></div>
+            <div><dt>Aba</dt><dd>gid 0</dd></div>
+            <div><dt>Atualização automática</dt><dd>30 segundos</dd></div>
+            <div><dt>Última sincronização</dt><dd id="lastSync">--</dd></div>
+          </dl>
+          <a class="button button-secondary button-full" href="https://docs.google.com/spreadsheets/d/1q2U2aHvxry0A4LBsZ3ge4CPdAPBw7T3gFfcqmZNEbKA/edit?gid=0#gid=0" target="_blank" rel="noreferrer">Abrir planilha</a>
+        </article>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="card-label">Histórico</p>
+            <h2>Últimas leituras</h2>
+          </div>
+          <span id="tableCount" class="muted">-- registros</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Pulsos</th>
+                <th>Litros</th>
+                <th>Valor</th>
+                <th>Incremento</th>
+              </tr>
+            </thead>
+            <tbody id="readingsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Crescer Automação</span>
+      <span id="footerStatus">Aguardando dados...</span>
+    </footer>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
